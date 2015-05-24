@@ -5,6 +5,7 @@ function jpeg_quality_callback( $arg ) {
 	return (int)75;
 }
 add_filter( 'jpeg_quality', 'jpeg_quality_callback' );
+add_filter( 'wp_editor_set_quality', 'jpeg_quality_callback' );
 
 /* Remove unnecessary header information */
 function remove_header_info() {
