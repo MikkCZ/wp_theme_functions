@@ -38,3 +38,33 @@ function remove_x_pingback( $headers ) {
     return $headers;
 }
 add_filter( 'wp_headers', 'remove_x_pingback' );
+
+/*
+* User login by e-mail
+* ispired by http://blog.doprofilu.cz/tipy-triky/wordpress-prihlaseni-pomoci-emailu.html
+* and http://wordpress.stackexchange.com/questions/161709/customize-the-registration-complete-please-check-your-e-mail-message-on-wp-4
+*/
+function email_login_auth( $user, $username, $password ) {
+	if ( is_email( $username ) ) {
+		$user_by_email = get_user_by( 'email', $username );
+		if ( $user_by_email instanceof WP_User ) {
+			$user = null;
+			$username = $user_by_email->user_login;
+		}
+	}
+	return wp_authenticate_username_password( $user, $username, $password );
+}
+add_filter( 'authenticate', 'email_login_auth', 20, 3 );
+
+function email_login_auth_label( $translated_text, $untranslated_text, $domain ) {
+	if ( $untranslated_text == 'Username' ) {
+		$translated_text .= ' / Email';
+		remove_filter( current_filter(), __FUNCTION__ );
+	}
+	return $translated_text;
+}
+add_filter( 'login_init',
+	function() {
+		add_filter( 'gettext', 'email_login_auth_label', 99, 3 );
+	}
+);
